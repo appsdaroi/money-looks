@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
-import { useRouter } from 'next/router'
+import { useState, useEffect, useContext } from "react";
+import { useRouter } from "next/router";
+
+import { moneyContext } from "@/services/moneyContext";
+import { CentsToReais } from "@/helpers/format";
 
 import { getSession } from "next-auth/react";
 import ProgressBar from "@/modules/progressBar";
@@ -7,6 +10,8 @@ import ProgressBar from "@/modules/progressBar";
 import { motion } from "framer-motion";
 
 export default function Home({ session }) {
+  const { money, setMoney } = useContext(moneyContext);
+
   const router = useRouter();
 
   const [progress, setProgress] = useState(0);
@@ -19,7 +24,7 @@ export default function Home({ session }) {
         }, 50 * ind);
       })(i);
     }
-    
+
     setTimeout(() => {
       router.push("/withdraw")
     }, 7000);
@@ -27,20 +32,44 @@ export default function Home({ session }) {
 
   return (
     <>
-      <section className="relative p-3 h-[calc(100vh-64px)]">
-        <div className="absolute top-0 bottom-0 left-0 right-0 bg-black/40"></div>
+      <nav className="fixed top-0 z-50 flex items-center w-full gap-5 px-3 py-2 font-bold text-black bg-white">
+        <i className="text-4xl fas fa-bars" />
+        <img src="/img/LDM-WHITE.png" className="object-contain w-20 h-12" />
+        <div className="bg-[#00AC05] grid grid-cols-2 px-3 py-0 rounded-lg h-11 flex-1 items-center justify-center shadow-[1px_3px_10px_2px_rgba(0,178,5,.28)]">
+          <div className="flex items-center text-white">
+            <i className="mr-3 text-2xl fas fa-dollar-sign text-[#42ff47]" />
+            SALDO:
+          </div>
+          <span className="text-center text-white line-clamp-1">
+            {!!money ? CentsToReais(money) : "Carregando..."}
+          </span>
+        </div>
+      </nav>
 
-        <div className="relative z-1 flex flex-col gap-4 items-center justify-center h-full bg-black/50 border border-white rounded-2xl shadow-[0px_0px_10px_0px_rgba(255,255,255,0.35)] p-3">
+      <nav className="relative z-50 flex items-center invisible w-full gap-5 px-3 py-2 font-bold text-black bg-white">
+        <i className="text-4xl fas fa-bars" />
+        <img src="/img/LDM-WHITE.png" className="object-contain w-20 h-12" />
+        <div className="bg-[#00AC05] grid grid-cols-2 px-3 py-0 rounded-lg h-11 flex-1 items-center justify-center">
+          <div className="flex items-center text-white">
+            <i className="mr-3 text-2xl fas fa-dollar-sign text-[#42ff47]" />
+            SALDO:
+          </div>
+          <span className="text-center text-white line-clamp-1"></span>
+        </div>
+      </nav>
+
+      <section className="relative p-3 h-[calc(100vh-64px)]">
+        <div className="relative flex flex-col items-center justify-center h-full gap-4 p-3 bg-white shadow-lg z-1 rounded-2xl">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
-            className="flex justify-center w-full items-top"
+            className="flex items-center justify-center w-full gap-4"
           >
-            <i className="fab fa-telegram-plane text-[#C800C8] text-3xl w-[12%] ml-auto" />
-            <span className="py-1 font-extrabold text-white w-[85%] text-center text-xl leading-none pr-3">
+            <i className="text-2xl fas fa-tshirt" />
+            <span className="py-1 pr-3 text-xl font-semibold leading-none text-center">
               ENVIANDO SUA <br />
-              AVALIAÇÃO
+              AVALIAÇÃO...
             </span>
           </motion.div>
 
@@ -48,13 +77,13 @@ export default function Home({ session }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
-            className="flex items-center justify-center w-full bg-[#9E009E] border border-[#FF5DFF] rounded-lg"
+            className="flex items-center justify-center w-full bg-[#00AC05] rounded-[1rem]"
           >
             <ProgressBar bgcolor="black" completed={progress} />
           </motion.div>
         </div>
       </section>
-
+      {/* 
       <footer className="fixed bottom-0 flex w-full text-white bg-black">
         <div className="flex items-center justify-center w-1/5 py-3">
           <i className="text-4xl fas fa-bars" />
@@ -77,7 +106,7 @@ export default function Home({ session }) {
         <div className="flex items-center justify-center w-1/5 py-3">
           <i className="text-4xl fas fa-user-circle" />
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

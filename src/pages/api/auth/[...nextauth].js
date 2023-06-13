@@ -1,10 +1,10 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { randomBetweenRange } from "@/helpers/random";
-
 import _ from "lodash";
 import axios from "axios";
+
+import { FetchWithToken } from "@/utils/fetch";
 
 export default NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
@@ -23,73 +23,60 @@ export default NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
-        const config = {
-          headers: {
-            "X-Master-Key":
-              "$2b$10$qo5bE7wh/z3fVPs.xyH6W.jly4sXaI7d3T3LoiqfYl8Rkw0U1JThi",
-          },
-        };
+        if (!credentials?.username || !credentials.password) {
+          return null;
+        }
 
-        const db = await axios.get(
-          "https://api.jsonbin.io/v3/b/642eb873ace6f33a2205d83f",
-          config
+        const request = axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/login`,
+          {
+            username: credentials.username,
+            password: credentials.password,
+          }
         );
 
-        const dbUser = _.find(
-          db.data.record.users,
-          (user) =>
-            user.username === credentials.username &&
-            user.password === credentials.password
-        );
+        return await request
+          .then(async (res) => {
+            if (res.data.status !== 200)
+              throw new Error("Usuário ou senha incorretos");
 
-        const currentData = db.data.record;
+            const thisUserId = res.data.response.id;
+            const thisUserToken = res.data.response.api_token;
 
-        dbUser.balance = randomBetweenRange(250000, 800000);
+            const thisUserData = await FetchWithToken({
+              path: `avaliador/${thisUserId}`,
+              method: "GET",
+              token: thisUserToken,
+            });
 
-        const thisIndex = _.findIndex(
-          currentData.users,
-          (user) =>
-            user.username === credentials.username &&
-            user.password === credentials.password
-        );
+            if (thisUserData.data.status !== 200)
+              throw new Error("Usuário não tem registro neste APP.");
 
-        currentData.users.splice(thisIndex, 1, dbUser);
-
-        await axios({
-          method: "put",
-          url: "https://api.jsonbin.io/v3/b/642eb873ace6f33a2205d83f",
-          headers: {
-            "X-Master-Key":
-              "$2b$10$qo5bE7wh/z3fVPs.xyH6W.jly4sXaI7d3T3LoiqfYl8Rkw0U1JThi",
-          },
-          data: currentData,
-        });
-
-        console.log(dbUser);
-        if (dbUser) return dbUser;
-
-        return null;
+            return {
+              session: {
+                user: {
+                  id: res.data.response.id,
+                  username: res.data.response.username,
+                  token: res.data.response.api_token,
+                  balance: thisUserData.data.response.user.balance,
+                  bank: thisUserData.data.response.user.bank,
+                },
+              },
+            };
+          })
+          .catch((e) => {
+            console.log(e);
+            throw new Error(e);
+          });
       },
     }),
   ],
   callbacks: {
-    jwt: async ({ token, user }) => {
-      if (user) {
-        token.id = user.id;
-        token.username = user.username;
-        token.balance = user.balance;
-      }
-
-      return token;
+    jwt: ({ token, user }) => {
+      return { ...token, ...user };
     },
-    session: async ({ session, token }) => {
-      if (token) {
-        session.user.username = token.username;
-        session.user.id = token.id;
-        session.user.balance = token.balance;
-      }
-
-      return session;
+    session: ({ session, token }) => {
+      return { ...session, ...token };
     },
   },
 });

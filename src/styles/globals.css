@@ -11,9 +11,6 @@ html * {
     font-family: 'Poppins', sans-serif;
 }
 
-section {
-    background-image: url("/section-bg.jpg");
-    background-position: center;
-    background-repeat: repeat;
-    background-size: 703px auto;
+body {
+    background-color: #e8e8e8;
 }

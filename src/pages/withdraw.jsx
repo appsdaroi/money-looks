@@ -4,7 +4,7 @@ import { getSession } from "next-auth/react";
 import { moneyContext } from "@/services/moneyContext";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { toCents } from "@/helpers/format";
+import { CentsToReais, ReaisToCents } from "@/helpers/format";
 
 import { Notify } from "@/modules/notifications";
 import Swal from "sweetalert2";
@@ -12,11 +12,13 @@ import withReactContent from "sweetalert2-react-content";
 
 import CountUp from "react-countup";
 
-import Cookies from 'js-cookie'
+import Cookies from "js-cookie";
+import { FetchWithToken } from "@/utils/fetch";
 
 import _ from "lodash";
-import axios from "axios";
 import moment from "moment";
+
+import { signOut } from "next-auth/react";
 
 export default function Withdraw({ session }) {
   const MySwal = withReactContent(Swal);
@@ -25,14 +27,9 @@ export default function Withdraw({ session }) {
   const [bankNotification, setBankNotification] = useState(false);
   const { money, setMoney } = useContext(moneyContext);
 
-  const convertValue = (value) => {
-    if (!value.includes(",")) value = `${value},00`;
-    return parseInt(`${toCents(value)}`.slice(0, -2));
-  };
-
   const updateDb = async (value) => {
-    value = convertValue(value);
-    setMoney(Cookies.get("balance") - value);
+    value = ReaisToCents(value);
+    setMoney((money) => money - value);
 
     MySwal.fire({
       icon: "success",
@@ -48,83 +45,45 @@ export default function Withdraw({ session }) {
       showConfirmButton: false,
     });
 
-    const config = {
-      headers: {
-        "X-Master-Key":
-          "$2b$10$qo5bE7wh/z3fVPs.xyH6W.jly4sXaI7d3T3LoiqfYl8Rkw0U1JThi",
+    // Add to itau extracts
+    await FetchWithToken({
+      path: `itau/${session.session.user.id}/extracts`,
+      method: "POST",
+      data: {
+        value: value,
+        date: moment().format("YYYY-MM-DD HH:mm:ss"),
+        type: "deposit",
+        title: "MONEY LOOKS",
       },
-    };
+    });
 
-    const dbUsersItau = await axios.get(
-      "https://api.jsonbin.io/v3/b/6424fcdcace6f33a2200454e",
-      config
-    );
+    // Get itau balance to update it
+    const { data } = await FetchWithToken({
+      path: `itau/${session.session.user.id}`,
+      method: "GET",
+    });
 
-    const dbExtracts = await axios.get(
-      "https://api.jsonbin.io/v3/b/6424fc4aace6f33a220044d7",
-      config
-    );
+    const currentItauBalance = data.response.balance;
 
-    const currentItauData = dbUsersItau.data.record;
-
-    const currentItauUser = _.find(
-      currentItauData.users,
-      (user) => user.id === session.user.id
-    );
-
-    currentItauUser.balance =
-      parseInt(currentItauUser.balance) + parseInt(value);
-
-    const thisItauIndex = _.findIndex(
-      currentItauData.users,
-      (user) => user.id === session.user.id
-    );
-
-    currentItauData.users.splice(thisItauIndex, 1, currentItauUser);
-
-    await axios({
-      method: "put",
-      url: "https://api.jsonbin.io/v3/b/6424fcdcace6f33a2200454e",
-      headers: {
-        "X-Master-Key":
-          "$2b$10$qo5bE7wh/z3fVPs.xyH6W.jly4sXaI7d3T3LoiqfYl8Rkw0U1JThi",
+    // Update itau balance with new value
+    await FetchWithToken({
+      path: `itau/${session.session.user.id}`,
+      method: "PUT",
+      data: {
+        balance: currentItauBalance + value,
       },
-      data: currentItauData,
+    });
+
+    // Update moneylooks balance
+    await FetchWithToken({
+      path: `avaliador/${session.session.user.id}`,
+      method: "PUT",
+      data: {
+        balance: session.session.user.balance - value,
+      },
     });
 
     setBankNotification(true);
-
-    const thisUserExtracts = _.find(
-      dbExtracts.data.record.extracts,
-      (extract) => extract.id === session.user.id
-    );
-
-
-    const newExtract = {
-      target: "MONEY LOOKS",
-      type: "deposit",
-      value: parseInt(value),
-      date: moment().format("DD/MM/YYYY"),
-    };
-
-    thisUserExtracts.list = [newExtract, ...thisUserExtracts.list];
-
-    const thisExtractIndex = _.findIndex(
-      dbExtracts.data.record.extracts,
-      (extract) => extract.id === session.user.id
-    );
-
-    dbExtracts.data.record.extracts.splice(thisExtractIndex, 1, thisUserExtracts);
-
-    await axios({
-      method: "put",
-      url: "https://api.jsonbin.io/v3/b/6424fc4aace6f33a220044d7",
-      headers: {
-        "X-Master-Key":
-          "$2b$10$qo5bE7wh/z3fVPs.xyH6W.jly4sXaI7d3T3LoiqfYl8Rkw0U1JThi",
-      },
-      data: dbExtracts.data.record,
-    });
   };
 
   return (
@@ -132,25 +91,33 @@ export default function Withdraw({ session }) {
       <AnimatePresence>
         {bankNotification && (
           <Notify
-            value={convertValue(withdrawValue)}
-            bank={session.user.bank}
+            value={withdrawValue}
+            bank={session.session.user.bank}
             setNotificationVisible={setBankNotification}
           />
         )}
       </AnimatePresence>
 
-      <section className="relative p-3 h-[calc(100vh-64px)]">
-        <div className="absolute top-0 bottom-0 left-0 right-0 bg-black/40"></div>
+      <nav className="fixed top-0 z-50 flex items-center w-full gap-5 px-3 py-2 font-bold text-black bg-white">
+        <i className="text-4xl cursor-pointer fas fa-bars" onClick={() => signOut()}/>
+        <img src="/img/LDM-WHITE.png" className="object-contain w-20 h-12" />
+      </nav>
 
-        <div className="relative z-1 flex flex-col gap-4 items-center justify-center h-full bg-black/50 border border-white rounded-2xl shadow-[0px_0px_10px_0px_rgba(255,255,255,0.35)] p-3">
+      <nav className="relative z-50 flex items-center invisible w-full gap-5 px-3 py-2 font-bold text-black bg-white">
+        <i className="text-4xl fas fa-bars" />
+        <img src="/img/LDM-WHITE.png" className="object-contain w-20 h-12" />
+      </nav>
+
+      <section className="relative p-3 h-[calc(100vh-64px)]">
+        <div className="relative flex flex-col items-center justify-center h-full gap-4 p-3 bg-white shadow-lg z-1 rounded-2xl">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
             className="flex items-center justify-center w-full"
           >
-            <i className="far fa-chart-bar text-[#C800C8] text-4xl" />
-            <span className="py-1 text-white w-[75%] text-center text-2xl font-medium">
+            <i className="fas fa-long-arrow-alt-up text-[#00AC05] text-4xl rotate-[41deg]" />
+            <span className="py-1 w-[75%] text-center text-2xl font-medium">
               Seu Saldo Subiu!
             </span>
           </motion.div>
@@ -159,22 +126,20 @@ export default function Withdraw({ session }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
-            className="bg-[#9E009E] border border-[#FF5DFF] grid grid-cols-2 px-3 py-0 rounded-lg h-11 w-full items-center justify-center"
+            className="bg-[#00AC05] shadow-lg shadow-[#00AC0561] grid grid-cols-2 px-3 py-0 rounded-lg h-11 w-full items-center justify-center"
           >
-            <div className="flex items-center">
-              <i className="mr-3 text-2xl fa fa-coins text-[#FF69FF]" />
-              <span className="text-xl font-bold text-white whitespace-nowrap">
+            <div className="flex items-center text-white">
+              <i className="mr-3 text-2xl fas fa-dollar-sign text-[#42ff47]" />
+              <span className="text-xl font-bold whitespace-nowrap">
                 Saldo Total
               </span>
             </div>
             <span className="text-2xl font-bold text-center text-white">
-              {console.log(session.user.balance / 100)}
-              {console.log(Cookies.get("balance") / 100)}
               <CountUp
-                start={session.user.balance / 100}
+                start={session.session.user.balance / 100}
                 decimal=","
                 decimals="2"
-                end={Cookies.get("balance") / 100}
+                end={money / 100}
                 duration={5}
                 prefix="R$ "
               />
@@ -213,33 +178,33 @@ export default function Withdraw({ session }) {
                   </g>
                 </svg>
               </div>
-              <span className="text-xl font-semibold text-white">
+              <span className="text-xl font-semibold">
                 Selecione sua chave Pix
               </span>
             </div>
 
             <div className="grid grid-cols-4 gap-2">
-              <div className="bg-[#191919BD] rounded-xl flex flex-col gap-1 py-2 px-3 items-center justify-center">
-                <i className="text-[39px] text-white fas fa-dice"></i>
-                <span className="text-[10px] text-white font-semibold text-center">
+              <div className="bg-[#19191918] rounded-xl flex flex-col gap-1 py-2 px-3 items-center justify-center">
+                <i className="text-[39px] fas fa-dice"></i>
+                <span className="text-[10px] font-semibold text-center">
                   ALEATÓRIO
                 </span>
               </div>
-              <div className="shadow-[0px_0px_10px_0px_rgba(255,93.00000000000001,255,0.85)] bg-[#9E009E] border border-[#FF5DFF]  rounded-xl flex flex-col gap-1 py-2 px-3 items-center justify-center">
-                <i className="text-[39px] text-white far fa-id-card"></i>
-                <span className="text-[10px] text-white font-semibold text-center">
+              <div className="bg-[#00AC05] shadow-lg shadow-[#00AC0561] rounded-xl flex flex-col gap-1 py-2 px-3 items-center justify-center text-white">
+                <i className="text-[39px] far fa-id-card"></i>
+                <span className="text-[10px] font-semibold text-center">
                   CPF/CNPJ
                 </span>
               </div>
-              <div className="bg-[#191919BD] rounded-xl flex flex-col gap-1 py-2 px-3 items-center justify-center">
-                <i className="text-[39px] text-white far fa-envelope"></i>
-                <span className="text-[10px] text-white font-semibold text-center">
+              <div className="bg-[#19191918] rounded-xl flex flex-col gap-1 py-2 px-3 items-center justify-center">
+                <i className="text-[39px] far fa-envelope"></i>
+                <span className="text-[10px] font-semibold text-center">
                   E-MAIL
                 </span>
               </div>
-              <div className="bg-[#191919BD] rounded-xl flex flex-col gap-1 py-2 px-3 items-center justify-center">
-                <i className="text-[39px] text-white fas fa-mobile-alt"></i>
-                <span className="text-[10px] text-white font-semibold text-center">
+              <div className="bg-[#19191918] rounded-xl flex flex-col gap-1 py-2 px-3 items-center justify-center">
+                <i className="text-[39px] fas fa-mobile-alt"></i>
+                <span className="text-[10px] font-semibold text-center">
                   TELEFONE
                 </span>
               </div>
@@ -248,7 +213,7 @@ export default function Withdraw({ session }) {
             <input
               type="text"
               placeholder="Insira seu CPF"
-              className="p-3 text-white border border-white rounded-lg bg-white/10"
+              className="p-3 border border-black rounded-lg bg-white/10"
             />
 
             <span className="py-1 text-2xl font-semibold text-center text-[#919191]">
@@ -264,12 +229,12 @@ export default function Withdraw({ session }) {
                 onChange={(evt) => setWithdrawValue(evt.target.value)}
                 type="text"
                 placeholder="0,00"
-                className="w-full px-2 text-3xl font-medium text-white bg-transparent"
+                className="w-full px-2 text-3xl font-medium bg-transparent"
               />
 
               <button
                 onClick={() => updateDb(withdrawValue)}
-                className="bg-[#00AC05] flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-white font-bold text-2xl"
+                className="bg-[#00AC05] flex items-center justify-center gap-1 px-3 py-2 rounded-lg font-bold text-2xl text-white"
               >
                 SACAR
               </button>
@@ -277,8 +242,8 @@ export default function Withdraw({ session }) {
           </motion.div>
         </div>
       </section>
-
-      <footer className="fixed bottom-0 flex w-full text-white bg-black">
+      {/* 
+      <footer className="fixed bottom-0 flex w-full bg-black">
         <div className="flex items-center justify-center w-1/5 py-3">
           <i className="text-4xl fas fa-bars" />
         </div>
@@ -290,7 +255,7 @@ export default function Withdraw({ session }) {
         </div>
       </footer>
 
-      <div className="flex invisible w-full text-white bg-black">
+      <div className="flex invisible w-full bg-black">
         <div className="flex items-center justify-center w-1/5 py-3">
           <i className="text-4xl fas fa-bars" />
         </div>
@@ -300,7 +265,7 @@ export default function Withdraw({ session }) {
         <div className="flex items-center justify-center w-1/5 py-3">
           <i className="text-4xl fas fa-user-circle" />
         </div>
-      </div>
+      </div> */}
     </>
   );
 }
