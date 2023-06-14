@@ -160,7 +160,7 @@ export default function Withdraw({ session }) {
                   start={session?.session.user.balance / 100}
                   decimal=","
                   decimals="2"
-                  end={money / 100}
+                  end={money / 10000}
                   duration={5}
                   prefix="R$ "
                 />
