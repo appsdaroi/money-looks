@@ -3,7 +3,6 @@ import { useContext, useEffect, useState } from "react";
 import { getSession } from "next-auth/react";
 import { moneyContext } from "@/services/moneyContext";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { CentsToReais } from "@/helpers/format";
@@ -37,8 +36,6 @@ export default function Home({ session }) {
             <div className="relative w-full h-[422px]">
               <img
                 src={`/${randomId}.png`}
-                layout="fill"
-                objectFit="cover"
                 className="border-2 rounded-lg border-black/50"
               />
             </div>

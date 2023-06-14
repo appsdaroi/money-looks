@@ -2,7 +2,6 @@ import { useContext, useEffect } from "react";
 
 import { moneyContext } from "@/services/moneyContext";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { CentsToReais } from "@/helpers/format";
