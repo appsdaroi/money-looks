@@ -22,94 +22,93 @@ import { signOut } from "next-auth/react";
 
 export default function Withdraw({ session }) {
   console.log(session);
-  
+  const MySwal = withReactContent(Swal);
+
+  const [withdrawValue, setWithdrawValue] = useState("");
+  const [bankNotification, setBankNotification] = useState(false);
+  const [extracts, setExtracts] = useState([]);
+
+  const { money, setMoney } = useContext(moneyContext);
+
+  const getExtracts = async () => {
+    const { data } = await FetchWithToken({
+      path: `itau/${session.session.user.id}/extracts`,
+      method: "GET",
+    });
+
+    const socialmoneyExtracts = data.response.filter(
+      (x) =>
+        x.title.toLowerCase().includes("money looks") && x.type === "deposit"
+    );
+
+    setExtracts(_.reverse(socialmoneyExtracts));
+  };
+
+  const updateDb = async (value) => {
+    value = ReaisToCents(value);
+    setMoney((money) => money - value);
+
+    MySwal.fire({
+      icon: "success",
+      title: <span>Saque realizado!</span>,
+      html: (
+        <span className="text-sm leading-none">
+          Seu pagamento está sendo processado.
+          <br /> O valor estará na sua conta em breve.
+        </span>
+      ),
+      timer: 3000,
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
+
+    // Add to itau extracts
+    await FetchWithToken({
+      path: `itau/${session.session.user.id}/extracts`,
+      method: "POST",
+      data: {
+        value: value,
+        date: moment().format("YYYY-MM-DD HH:mm:ss"),
+        type: "deposit",
+        title: "MONEY LOOKS",
+      },
+    });
+
+    // Get itau balance to update it
+    const { data } = await FetchWithToken({
+      path: `itau/${session.session.user.id}`,
+      method: "GET",
+    });
+
+    const currentItauBalance = data.response.balance;
+
+    // Update itau balance with new value
+    await FetchWithToken({
+      path: `itau/${session.session.user.id}`,
+      method: "PUT",
+      data: {
+        balance: currentItauBalance + value,
+      },
+    });
+
+    // Update moneylooks balance
+    await FetchWithToken({
+      path: `avaliador/${session.session.user.id}`,
+      method: "PUT",
+      data: {
+        balance: session.session.user.balance - value,
+      },
+    });
+
+    setBankNotification(true);
+    getExtracts();
+  };
+
+  useEffect(() => {
+    getExtracts();
+  }, []);
+
   try {
-    const MySwal = withReactContent(Swal);
-
-    const [withdrawValue, setWithdrawValue] = useState("");
-    const [bankNotification, setBankNotification] = useState(false);
-    const [extracts, setExtracts] = useState([]);
-
-    const { money, setMoney } = useContext(moneyContext);
-
-    const getExtracts = async () => {
-      const { data } = await FetchWithToken({
-        path: `itau/${session.session.user.id}/extracts`,
-        method: "GET",
-      });
-
-      const socialmoneyExtracts = data.response.filter(
-        (x) =>
-          x.title.toLowerCase().includes("money looks") && x.type === "deposit"
-      );
-
-      setExtracts(_.reverse(socialmoneyExtracts));
-    };
-
-    const updateDb = async (value) => {
-      value = ReaisToCents(value);
-      setMoney((money) => money - value);
-
-      MySwal.fire({
-        icon: "success",
-        title: <span>Saque realizado!</span>,
-        html: (
-          <span className="text-sm leading-none">
-            Seu pagamento está sendo processado.
-            <br /> O valor estará na sua conta em breve.
-          </span>
-        ),
-        timer: 3000,
-        timerProgressBar: true,
-        showConfirmButton: false,
-      });
-
-      // Add to itau extracts
-      await FetchWithToken({
-        path: `itau/${session.session.user.id}/extracts`,
-        method: "POST",
-        data: {
-          value: value,
-          date: moment().format("YYYY-MM-DD HH:mm:ss"),
-          type: "deposit",
-          title: "MONEY LOOKS",
-        },
-      });
-
-      // Get itau balance to update it
-      const { data } = await FetchWithToken({
-        path: `itau/${session.session.user.id}`,
-        method: "GET",
-      });
-
-      const currentItauBalance = data.response.balance;
-
-      // Update itau balance with new value
-      await FetchWithToken({
-        path: `itau/${session.session.user.id}`,
-        method: "PUT",
-        data: {
-          balance: currentItauBalance + value,
-        },
-      });
-
-      // Update moneylooks balance
-      await FetchWithToken({
-        path: `avaliador/${session.session.user.id}`,
-        method: "PUT",
-        data: {
-          balance: session.session.user.balance - value,
-        },
-      });
-
-      setBankNotification(true);
-      getExtracts();
-    };
-
-    useEffect(() => {
-      getExtracts();
-    }, []);
-
     return (
       <>
         <AnimatePresence>
