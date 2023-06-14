@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 import { SessionProvider } from "next-auth/react";
 
-import { Layout } from "./layout";
+import Layout from "./layout";
 
 import { MoneyContextProvider } from "@/services/moneyContext";
 

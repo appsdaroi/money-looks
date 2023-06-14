@@ -9,7 +9,7 @@ import { signOut } from "next-auth/react";
 
 import Cookies from "js-cookie";
 
-const Layout = ({ children, session }) => {
+export default function Layout({ children, session }) {
   const { money } = useContext(moneyContext);
 
   return (
@@ -78,5 +78,3 @@ const Layout = ({ children, session }) => {
     </>
   );
 };
-
-export { Layout };
