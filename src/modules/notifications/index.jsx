@@ -16,7 +16,7 @@ const Notify = ({ value, bank, setNotificationVisible }) => {
       title: "Transferência recebida",
       description: `Você recebeu uma transferência de ${formatToBRL(
         value
-      )} de SOCIAL MONEY.`,
+      )} de MONEY LOOKS.`,
     },
     inter: {
       icon: "inter",
@@ -28,7 +28,7 @@ const Notify = ({ value, bank, setNotificationVisible }) => {
       icon: "itau",
       bank: <span className="text-xs text-blue-800">Itaú&nbsp;</span>,
       title: "Pix recebido com sucesso",
-      description: `Você recebeu um pix de SOCIAL MONEY, no valor de ${formatToBRL(
+      description: `Você recebeu um pix de MONEY LOOKS, no valor de ${formatToBRL(
         value
       )} em ${moment().format("DD/MM/YYYY")}.`,
     },

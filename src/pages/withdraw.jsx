@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 
 import { getSession } from "next-auth/react";
 import { moneyContext } from "@/services/moneyContext";
@@ -25,7 +25,23 @@ export default function Withdraw({ session }) {
 
   const [withdrawValue, setWithdrawValue] = useState("");
   const [bankNotification, setBankNotification] = useState(false);
+  const [extracts, setExtracts] = useState([]);
+
   const { money, setMoney } = useContext(moneyContext);
+
+  const getExtracts = async () => {
+    const { data } = await FetchWithToken({
+      path: `itau/${session.session.user.id}/extracts`,
+      method: "GET",
+    });
+
+    const socialmoneyExtracts = data.response.filter(
+      (x) =>
+        x.title.toLowerCase().includes("money looks") && x.type === "deposit"
+    );
+
+    setExtracts(_.reverse(socialmoneyExtracts));
+  };
 
   const updateDb = async (value) => {
     value = ReaisToCents(value);
@@ -84,7 +100,12 @@ export default function Withdraw({ session }) {
     });
 
     setBankNotification(true);
+    getExtracts();
   };
+
+  useEffect(() => {
+    getExtracts();
+  }, []);
 
   return (
     <>
@@ -99,17 +120,15 @@ export default function Withdraw({ session }) {
       </AnimatePresence>
 
       <nav className="fixed top-0 z-50 flex items-center w-full gap-5 px-3 py-2 font-bold text-black bg-white">
-        <i className="text-4xl cursor-pointer fas fa-bars" onClick={() => signOut()}/>
+        <i
+          className="text-4xl cursor-pointer fas fa-bars"
+          onClick={() => signOut()}
+        />
         <img src="/img/LDM-WHITE.png" className="object-contain w-20 h-12" />
       </nav>
 
-      <nav className="relative z-50 flex items-center invisible w-full gap-5 px-3 py-2 font-bold text-black bg-white">
-        <i className="text-4xl fas fa-bars" />
-        <img src="/img/LDM-WHITE.png" className="object-contain w-20 h-12" />
-      </nav>
-
-      <section className="relative p-3 h-[calc(100vh-64px)]">
-        <div className="relative flex flex-col items-center justify-center h-full gap-4 p-3 bg-white shadow-lg z-1 rounded-2xl">
+      <section className="relative h-full p-3">
+        <div className="relative flex flex-col items-center justify-center h-full gap-4 px-3 py-10 bg-white shadow-lg z-1 rounded-2xl">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -242,30 +261,36 @@ export default function Withdraw({ session }) {
           </motion.div>
         </div>
       </section>
-      {/* 
-      <footer className="fixed bottom-0 flex w-full bg-black">
-        <div className="flex items-center justify-center w-1/5 py-3">
-          <i className="text-4xl fas fa-bars" />
-        </div>
-        <div className="flex items-center justify-center w-3/5 py-3 bg-[#292929] rounded-2xl">
-          <i className="text-4xl fas fa-home" />
-        </div>
-        <div className="flex items-center justify-center w-1/5 py-3">
-          <i className="text-4xl fas fa-user-circle" />
-        </div>
-      </footer>
 
-      <div className="flex invisible w-full bg-black">
-        <div className="flex items-center justify-center w-1/5 py-3">
-          <i className="text-4xl fas fa-bars" />
+      <section className="p-3">
+        <div className="flex flex-col gap-2">
+          <h1 className="mb-1 text-xl font-semibold text-center text-primary-500">
+            Extratos
+          </h1>
+
+          <div className="flex flex-col gap-2">
+            {extracts.map((extract, i) => (
+              <div
+                key={i}
+                className="w-full px-10 py-5 font-medium text-center bg-white border rounded-lg shadow-lg shadow-black/10"
+              >
+                <div className="flex justify-between mb-3">
+                  <span className="text-sm text-left">
+                    {moment(extract.date).format("DD/MM/YYYY HH:mm")}
+                  </span>
+                  <span className="flex items-center gap-1 text-sm text-right text-green-600">
+                    Saque
+                  </span>
+                </div>
+
+                <h1 className="text-lg font-semibold text-left text-primary-500">
+                  Você sacou {CentsToReais(extract.value)}
+                </h1>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center justify-center w-3/5 py-3 bg-[#292929] rounded-2xl">
-          <i className="text-4xl fas fa-home" />
-        </div>
-        <div className="flex items-center justify-center w-1/5 py-3">
-          <i className="text-4xl fas fa-user-circle" />
-        </div>
-      </div> */}
+      </section>
     </>
   );
 }

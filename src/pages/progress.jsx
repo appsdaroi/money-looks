@@ -32,31 +32,6 @@ export default function Home({ session }) {
 
   return (
     <>
-      <nav className="fixed top-0 z-50 flex items-center w-full gap-5 px-3 py-2 font-bold text-black bg-white">
-        <i className="text-4xl fas fa-bars" />
-        <img src="/img/LDM-WHITE.png" className="object-contain w-20 h-12" />
-        <div className="bg-[#00AC05] grid grid-cols-2 px-3 py-0 rounded-lg h-11 flex-1 items-center justify-center shadow-[1px_3px_10px_2px_rgba(0,178,5,.28)]">
-          <div className="flex items-center text-white">
-            <i className="mr-3 text-2xl fas fa-dollar-sign text-[#42ff47]" />
-            SALDO:
-          </div>
-          <span className="text-center text-white line-clamp-1">
-            {!!money ? CentsToReais(money) : "Carregando..."}
-          </span>
-        </div>
-      </nav>
-
-      <nav className="relative z-50 flex items-center invisible w-full gap-5 px-3 py-2 font-bold text-black bg-white">
-        <i className="text-4xl fas fa-bars" />
-        <img src="/img/LDM-WHITE.png" className="object-contain w-20 h-12" />
-        <div className="bg-[#00AC05] grid grid-cols-2 px-3 py-0 rounded-lg h-11 flex-1 items-center justify-center">
-          <div className="flex items-center text-white">
-            <i className="mr-3 text-2xl fas fa-dollar-sign text-[#42ff47]" />
-            SALDO:
-          </div>
-          <span className="text-center text-white line-clamp-1"></span>
-        </div>
-      </nav>
 
       <section className="relative p-3 h-[calc(100vh-64px)]">
         <div className="relative flex flex-col items-center justify-center h-full gap-4 p-3 bg-white shadow-lg z-1 rounded-2xl">
@@ -83,30 +58,6 @@ export default function Home({ session }) {
           </motion.div>
         </div>
       </section>
-      {/* 
-      <footer className="fixed bottom-0 flex w-full text-white bg-black">
-        <div className="flex items-center justify-center w-1/5 py-3">
-          <i className="text-4xl fas fa-bars" />
-        </div>
-        <div className="flex items-center justify-center w-3/5 py-3 bg-[#292929] rounded-2xl">
-          <i className="text-4xl fas fa-home" />
-        </div>
-        <div className="flex items-center justify-center w-1/5 py-3">
-          <i className="text-4xl fas fa-user-circle" />
-        </div>
-      </footer>
-
-      <div className="flex invisible w-full text-white bg-black">
-        <div className="flex items-center justify-center w-1/5 py-3">
-          <i className="text-4xl fas fa-bars" />
-        </div>
-        <div className="flex items-center justify-center w-3/5 py-3 bg-[#292929] rounded-2xl">
-          <i className="text-4xl fas fa-home" />
-        </div>
-        <div className="flex items-center justify-center w-1/5 py-3">
-          <i className="text-4xl fas fa-user-circle" />
-        </div>
-      </div> */}
     </>
   );
 }
