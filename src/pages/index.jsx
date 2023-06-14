@@ -33,7 +33,7 @@ export default function Home({ session }) {
       {randomizePhotos.map((randomId, i) => (
         <section key={i} id={i + 1} className="relative p-3">
           <div className="relative flex flex-col items-center justify-center gap-3 p-5 bg-white rounded-lg shadow-lg z-1">
-            <div className="relative w-full h-[422px]">
+            <div className="relative w-full h-full">
               <img
                 src={`/${randomId}.png`}
                 className="border-2 rounded-lg border-black/50"
