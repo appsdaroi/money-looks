@@ -157,7 +157,7 @@ export default function Withdraw({ session }) {
               </div>
               <span className="text-2xl font-bold text-center text-white">
                 <CountUp
-                  start={session?.session.user.balance / 100}
+                  start={session?.session.user.balance / 10000}
                   decimal=","
                   decimals="2"
                   end={money / 10000}
