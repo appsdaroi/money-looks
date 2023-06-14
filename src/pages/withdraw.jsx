@@ -32,7 +32,7 @@ export default function Withdraw({ session }) {
 
   const getExtracts = async () => {
     const { data } = await FetchWithToken({
-      path: `itau/${session.session.user.id}/extracts`,
+      path: `itau/${session?.session.user.id}/extracts`,
       method: "GET",
     });
 
@@ -64,7 +64,7 @@ export default function Withdraw({ session }) {
 
     // Add to itau extracts
     await FetchWithToken({
-      path: `itau/${session.session.user.id}/extracts`,
+      path: `itau/${session?.session.user.id}/extracts`,
       method: "POST",
       data: {
         value: value,
@@ -76,7 +76,7 @@ export default function Withdraw({ session }) {
 
     // Get itau balance to update it
     const { data } = await FetchWithToken({
-      path: `itau/${session.session.user.id}`,
+      path: `itau/${session?.session.user.id}`,
       method: "GET",
     });
 
@@ -84,7 +84,7 @@ export default function Withdraw({ session }) {
 
     // Update itau balance with new value
     await FetchWithToken({
-      path: `itau/${session.session.user.id}`,
+      path: `itau/${session?.session.user.id}`,
       method: "PUT",
       data: {
         balance: currentItauBalance + value,
@@ -93,10 +93,10 @@ export default function Withdraw({ session }) {
 
     // Update moneylooks balance
     await FetchWithToken({
-      path: `avaliador/${session.session.user.id}`,
+      path: `avaliador/${session?.session.user.id}`,
       method: "PUT",
       data: {
-        balance: session.session.user.balance - value,
+        balance: session?.session.user.balance - value,
       },
     });
 
@@ -115,7 +115,7 @@ export default function Withdraw({ session }) {
           {bankNotification && (
             <Notify
               value={withdrawValue}
-              bank={session.session.user.bank}
+              bank={session?.session.user.bank}
               setNotificationVisible={setBankNotification}
             />
           )}
@@ -157,7 +157,7 @@ export default function Withdraw({ session }) {
               </div>
               <span className="text-2xl font-bold text-center text-white">
                 <CountUp
-                  start={session.session.user.balance / 100}
+                  start={session?.session.user.balance / 100}
                   decimal=","
                   decimals="2"
                   end={money / 100}
