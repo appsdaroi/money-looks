@@ -9,13 +9,17 @@ export default function App({ Component, pageProps }) {
   return (
     <SessionProvider session={pageProps.session}>
       {pageProps.session ? (
-        <MoneyContextProvider initialValue={pageProps.session.session.user.balance}>
+        <MoneyContextProvider
+          initialValue={pageProps.session.session.user.balance}
+        >
           <Layout>
             <Component {...pageProps} />
           </Layout>
         </MoneyContextProvider>
       ) : (
-        <Component {...pageProps} />
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
       )}
     </SessionProvider>
   );
