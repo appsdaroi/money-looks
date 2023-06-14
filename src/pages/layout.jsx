@@ -21,6 +21,8 @@ export default function Layout({ children, session }) {
         />
         <img src="/img/LDM-WHITE.png" className="object-contain w-20 h-12" />
         <Link
+          shallow
+          replace
           href="/withdraw"
           className="bg-[#00AC05] grid grid-cols-2 px-3 py-0 rounded-lg h-11 flex-1 items-center justify-center shadow-[1px_3px_10px_2px_rgba(0,178,5,.28)]"
         >
@@ -48,13 +50,21 @@ export default function Layout({ children, session }) {
 
       {children}
 
-      <footer
-        className="fixed bottom-0 flex justify-between px-8 w-full text-black bg-white shadow-[0px_0px_10px_0px_rgba(0,0,0,0.2)]"
-      >
-        <Link shallow replace href="/" className="flex items-center justify-center py-3 rounded-2xl">
+      <footer className="fixed bottom-0 flex justify-between px-8 w-full text-black bg-white shadow-[0px_0px_10px_0px_rgba(0,0,0,0.2)]">
+        <Link
+          shallow
+          replace
+          href="/"
+          className="flex items-center justify-center py-3 rounded-2xl"
+        >
           <i className="text-4xl fas fa-home" />
         </Link>
-        <Link shallow replace  href="/withdraw" className="flex items-center justify-center py-3">
+        <Link
+          shallow
+          replace
+          href="/withdraw"
+          className="flex items-center justify-center py-3"
+        >
           <i className="text-4xl fas fa-wallet" />
         </Link>
         <div className="flex items-center justify-center py-3">
@@ -62,13 +72,17 @@ export default function Layout({ children, session }) {
         </div>
       </footer>
 
-      <footer
-        className="relative invisible bottom-0 flex justify-between px-8 w-full text-black bg-white shadow-[0px_0px_10px_0px_rgba(0,0,0,0.2)]"
-      >
-        <Link href="/" className="flex items-center justify-center py-3 rounded-2xl">
+      <footer className="relative invisible bottom-0 flex justify-between px-8 w-full text-black bg-white shadow-[0px_0px_10px_0px_rgba(0,0,0,0.2)]">
+        <Link
+          href="/"
+          className="flex items-center justify-center py-3 rounded-2xl"
+        >
           <i className="text-4xl fas fa-home" />
         </Link>
-        <Link href="/withdraw" className="flex items-center justify-center py-3">
+        <Link
+          href="/withdraw"
+          className="flex items-center justify-center py-3"
+        >
           <i className="text-4xl fas fa-wallet" />
         </Link>
         <div className="flex items-center justify-center py-3">
@@ -77,4 +91,4 @@ export default function Layout({ children, session }) {
       </footer>
     </>
   );
-};
+}
