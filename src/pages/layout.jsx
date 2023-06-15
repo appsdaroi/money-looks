@@ -51,18 +51,18 @@ export default function Layout({ children, session }) {
       {children}
 
       <footer className="fixed bottom-0 flex justify-between px-8 w-full text-black bg-white shadow-[0px_0px_10px_0px_rgba(0,0,0,0.2)]">
-        <a
+        <Link
           href="/"
           className="flex items-center justify-center py-3 rounded-2xl"
         >
           <i className="text-4xl fas fa-home" />
-        </a>
-        <a
+        </Link>
+        <Link
           href="/withdraw"
           className="flex items-center justify-center py-3"
         >
           <i className="text-4xl fas fa-wallet" />
-        </a>
+        </Link>
         <div className="flex items-center justify-center py-3">
           <i className="text-4xl fas fa-user-circle" />
         </div>
