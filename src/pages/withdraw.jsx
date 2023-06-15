@@ -45,6 +45,7 @@ export default function Withdraw({ session }) {
   };
 
   const updateDb = async (value) => {
+    console.log(value)
     value = ReaisToCents(value);
     setMoney((money) => money - value);
 

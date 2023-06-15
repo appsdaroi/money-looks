@@ -12,11 +12,11 @@ import _ from "lodash";
 
 export default function Home({ session }) {
   const { money, setMoney } = useContext(moneyContext);
-  
-  const [randomizePhotos, setRandomizePhotos] = useState([])
+
+  const [randomizePhotos, setRandomizePhotos] = useState([]);
 
   useEffect(() => {
-    setRandomizePhotos(_.shuffle([...Array(9).keys()]))
+    setRandomizePhotos(_.shuffle([...Array(9).keys()]));
   }, []);
 
   return (
@@ -49,7 +49,7 @@ export default function Home({ session }) {
                 href={`#${i + 2}`}
                 onClick={() =>
                   setMoney(
-                    parseInt(money) + parseInt(`1${randomBetweenRange(10000, 19999)}`)
+                    (oldMoney) => parseInt(oldMoney) + parseInt(`1${randomBetweenRange(10000, 19999)}`)
                   )
                 }
                 className="shadow-[-1px_0_13px_5px_rgba(255,0,0,.32)] hover:scale-90 transition-transform flex items-center justify-center gap-2 text-white bg-[#a70202] rounded-[5px] px-2.5 py-1"
@@ -64,7 +64,7 @@ export default function Home({ session }) {
                 href={`#${i + 2}`}
                 onClick={() =>
                   setMoney(
-                    parseInt(money) + parseInt(`1${randomBetweenRange(10000, 19999)}`)
+                    (oldMoney) => parseInt(oldMoney) + parseInt(`1${randomBetweenRange(10000, 19999)}`)
                   )
                 }
                 className="shadow-[-1px_0_13px_5px_rgba(208,99,5,.22)] hover:scale-90 transition-transform flex items-center justify-center gap-2 text-white bg-[#d06305] rounded-[5px] px-2.5 py-1"
@@ -79,7 +79,7 @@ export default function Home({ session }) {
                 href={`#${i + 2}`}
                 onClick={() =>
                   setMoney(
-                    parseInt(money) + parseInt(`1${randomBetweenRange(10000, 19999)}`)
+                    (oldMoney) => parseInt(oldMoney) + parseInt(`1${randomBetweenRange(10000, 19999)}`)
                   )
                 }
                 className="shadow-[-1px_0_13px_5px_rgba(194,168,8,.18)] hover:scale-90 transition-transform flex items-center justify-center gap-2 text-white bg-[#c2a808] rounded-[5px] px-2.5 py-1"
@@ -94,7 +94,7 @@ export default function Home({ session }) {
                 href={`#${i + 2}`}
                 onClick={() =>
                   setMoney(
-                    parseInt(money) + parseInt(`1${randomBetweenRange(10000, 19999)}`)
+                    (oldMoney) => parseInt(oldMoney) + parseInt(`1${randomBetweenRange(10000, 19999)}`)
                   )
                 }
                 className="shadow-[-1px_0_13px_5px_rgba(104,164,4,.23)] hover:scale-90 transition-transform flex items-center justify-center gap-2 text-white bg-[#68a404] rounded-[5px] px-2.5 py-1"
@@ -109,7 +109,7 @@ export default function Home({ session }) {
                 href={`#${i + 2}`}
                 onClick={() =>
                   setMoney(
-                    parseInt(money) + parseInt(`1${randomBetweenRange(10000, 19999)}`)
+                    (oldMoney) => parseInt(oldMoney) + parseInt(`1${randomBetweenRange(10000, 19999)}`)
                   )
                 }
                 className="shadow-[-1px_0px_13px_5px_rgba(23.999999999999858,255,0,0.29)] hover:scale-90 transition-transform flex items-center justify-center gap-2 text-white bg-[#139A05] rounded-[5px] px-2.5 py-1"

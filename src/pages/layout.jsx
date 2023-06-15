@@ -30,7 +30,7 @@ export default function Layout({ children, session }) {
             <i className="mr-3 text-2xl fas fa-dollar-sign text-[#42ff47]" />
             SALDO:
           </div>
-          <span className="text-center text-white line-clamp-1">
+          <span className="text-center text-white whitespace-nowrap">
             {!!money ? CentsToReais(money) : "Carregando..."}
           </span>
         </Link>

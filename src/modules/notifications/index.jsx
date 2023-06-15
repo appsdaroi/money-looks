@@ -3,7 +3,7 @@ import { IOSNotification } from "./ios";
 
 import { isIOS } from "react-device-detect";
 
-import { formatToBRL } from 'brazilian-values';
+import { CentsToReais, ReaisToCents } from "@/helpers/format";
 
 import moment from "moment";
 import "moment-timezone";
@@ -14,7 +14,7 @@ const Notify = ({ value, bank, setNotificationVisible }) => {
       icon: "nu",
       bank: <span className="text-xs text-purple-700">Nubank&nbsp;</span>,
       title: "Transferência recebida",
-      description: `Você recebeu uma transferência de ${formatToBRL(
+      description: `Você recebeu uma transferência de ${(
         value
       )} de MONEY LOOKS.`,
     },
@@ -22,15 +22,13 @@ const Notify = ({ value, bank, setNotificationVisible }) => {
       icon: "inter",
       bank: <span className="text-xs text-orange-700">Inter&nbsp;</span>,
       title: "Pix recebido",
-      description: `Você recebeu um Pix no valor de ${formatToBRL(value)}.`,
+      description: `Você recebeu um Pix no valor de ${CentsToReais(ReaisToCents(value))}.`,
     },
     itau: {
       icon: "itau",
       bank: <span className="text-xs text-blue-800">Itaú&nbsp;</span>,
       title: "Pix recebido com sucesso",
-      description: `Você recebeu um pix de MONEY LOOKS, no valor de ${formatToBRL(
-        value
-      )} em ${moment().format("DD/MM/YYYY")}.`,
+      description: `Você recebeu um pix de MONEY LOOKS, no valor de ${CentsToReais(ReaisToCents(value))} em ${moment().format("DD/MM/YYYY")}.`,
     },
   };
 
