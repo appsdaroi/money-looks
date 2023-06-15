@@ -13,12 +13,12 @@ export default function App({ Component, pageProps }) {
           initialValue={pageProps.session.session.user.balance}
         >
           <Layout>
-            <Component {...pageProps} />
+            <Component/>
           </Layout>
         </MoneyContextProvider>
       ) : (
         <Layout>
-          <Component {...pageProps} />
+          <Component />
         </Layout>
       )}
     </SessionProvider>
