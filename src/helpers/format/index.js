@@ -5,7 +5,7 @@ const CentsToReais = (value) => {
 }
 
 const ReaisToCents = (value) => {
-    return parseInt(value.toString().replace(/\D/g, '')) * 10000;
+    return parseInt(value.toString().replace(/\D/g, '')) * 100;
 }
 
 export { CentsToReais, ReaisToCents }
