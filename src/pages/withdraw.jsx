@@ -85,6 +85,10 @@ export default function Withdraw() {
 
     const currentItauBalance = data.response.balance;
 
+    console.log(currentItauBalance)
+    console.log(value)
+    console.log(currentItauBalance + value)
+
     // Update itau balance with new value
     await FetchWithToken({
       path: `itau/${session?.session.user.id}`,
