@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { moneyContext } from "@/services/moneyContext";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -20,7 +20,9 @@ import moment from "moment";
 
 import { signOut } from "next-auth/react";
 
-export default function Withdraw({ session }) {
+export default function Withdraw() {
+  const { data: session, status } = useSession();
+
   console.log(session);
   const MySwal = withReactContent(Swal);
 
@@ -45,7 +47,7 @@ export default function Withdraw({ session }) {
   };
 
   const updateDb = async (value) => {
-    console.log(value)
+    console.log(value);
     value = ReaisToCents(value);
     setMoney((money) => money - value);
 
