@@ -7,20 +7,14 @@ import { MoneyContextProvider } from "@/services/moneyContext";
 
 export default function App({ Component, pageProps }) {
   return (
-    <SessionProvider session={pageProps.session}>
-      {pageProps.session ? (
-        <MoneyContextProvider
-          initialValue={pageProps.session.session.user.balance}
-        >
-          <Layout>
-            <Component/>
-          </Layout>
-        </MoneyContextProvider>
-      ) : (
+    <SessionProvider>
+      <MoneyContextProvider
+        initialValue={pageProps?.session?.session.user.balance}
+      >
         <Layout>
-          <Component />
+          <Component {...pageProps} />
         </Layout>
-      )}
+      </MoneyContextProvider>
     </SessionProvider>
   );
 }
